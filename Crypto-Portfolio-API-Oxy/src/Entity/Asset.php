@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\AssetRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=AssetRepository::class)
@@ -19,23 +20,26 @@ class Asset
 
     /**
      * @ORM\Column(type="string", length=40)
+     * @Assert\NotBlank()
      */
     private $label;
 
     /**
      * @ORM\Column(type="string", length=8)
+     * @Assert\Choice(choices={"BTC", "ETH", "IOTA"}, message="You can only select BTC, ETH and IOTA")
      */
     private $currency;
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\PositiveOrZero()
      */
     private $value;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="assets")
-     */
-    private $owner;
+//    /**
+//     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="assets")
+//     */
+//    private $owner;
 
     public function getId(): ?int
     {
@@ -78,15 +82,15 @@ class Asset
         return $this;
     }
 
-    public function getOwner(): ?User
-    {
-        return $this->owner;
-    }
-
-    public function setOwner(?User $owner): self
-    {
-        $this->owner = $owner;
-
-        return $this;
-    }
+//    public function getOwner(): ?User
+//    {
+//        return $this->owner;
+//    }
+//
+//    public function setOwner(?User $owner): self
+//    {
+//        $this->owner = $owner;
+//
+//        return $this;
+//    }
 }
