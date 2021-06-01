@@ -1,10 +1,9 @@
 <?php
-
+declare(strict_types=1);
 
 namespace App\Controller;
 
-
-use App\Controller\Model\AssetModel;
+use App\Model\AssetModel;
 use App\Entity\Asset;
 use App\Form\AssetType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -33,7 +32,7 @@ class AssetController extends AbstractController
 
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
         $form = $this->createForm(AssetType::class, $deserializedDataFromRequest);
-
+        dump($this->getUser());
         $form->submit(json_decode($request->getContent(), true));
         if (!$form->isValid()) {
             $errors = $this->getErrorsFromForm($form);

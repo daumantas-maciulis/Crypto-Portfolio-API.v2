@@ -1,7 +1,7 @@
 <?php
+declare(strict_types=1);
 
-
-namespace App\Controller\Model;
+namespace App\Model;
 
 
 use App\Entity\Asset;
