@@ -41,7 +41,7 @@
         "psr-4": {
             "App\\": "src/"
         }
-    },
+    },git
     "autoload-dev": {
         "psr-4": {
             "App\\Tests\\": "tests/"
@@ -70,7 +70,7 @@
     "extra": {
         "symfony": {
             "allow-contrib": false,
-            "require": "5.3.*"
+            "require": "5.2.*"
         }
     }
 }

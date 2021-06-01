@@ -28,6 +28,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $email;
 
     /**
+     * @ORM\Column(type="string", length=180)
+     */
+    private $username;
+
+    /**
      * @ORM\Column(type="json")
      */
     private $roles = [];
@@ -128,6 +133,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         // If you store any temporary, sensitive data on the user, clear it here
         // $this->plainPassword = null;
     }
+
+    private function setUsername()
+    {
+        $this->username = $this->email;
+    }
+
+    private function getUsername()
+    {
+        return $this->email;
+    }
+
+
 
 //    /**
 //     * @return Collection|Asset[]

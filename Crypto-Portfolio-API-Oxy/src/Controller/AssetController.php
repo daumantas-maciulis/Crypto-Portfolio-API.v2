@@ -89,7 +89,6 @@ class AssetController extends AbstractController
         $response = sprintf('Asset No. %s was successfully deleted', $id);
 
         return $this->json($response, Response::HTTP_OK);
-
     }
 
     /**
