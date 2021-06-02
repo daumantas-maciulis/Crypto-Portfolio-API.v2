@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Client\CoinLayer\Client;
 use App\Model\AssetModel;
 use App\Entity\Asset;
 use App\Form\AssetType;
+use App\Model\CryptoPricesModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,9 +27,8 @@ class AssetController extends AbstractController
     /**
      * @Route("", methods="POST")
      */
-    public function addNewAssetAction(Request $request, AssetModel $assetModel, ValidatorInterface $validator): JsonResponse
+    public function addNewAssetAction(Request $request, AssetModel $assetModel, ValidatorInterface $validator, CryptoPricesModel $cryptoPricesModel, Client $client): JsonResponse
     {
-
         $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
