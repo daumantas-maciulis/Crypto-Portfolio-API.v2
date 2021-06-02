@@ -8,6 +8,7 @@ use App\Form\UserType;
 use App\Model\UserModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -49,6 +50,44 @@ class SecurityController extends AbstractController
             ]);
         }
     }
+
+    /**
+     * @Route("/login", methods="POST")
+     */
+    public function getTokenAction(Request $request, UserModel $userModel): JsonResponse
+    {
+        $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
+
+        $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), User::class, 'json');
+
+        $form = $this->createForm(UserType::class, $deserializedDataFromRequest);
+
+        $form->submit(json_decode($request->getContent(), true));
+        if (!$form->isValid()) {
+            $errors = $this->getErrorsFromForm($form);
+            $errorResponse = [
+                'error' => $errors
+            ];
+            return $this->json($errorResponse, Response::HTTP_BAD_REQUEST);
+        }
+
+        if ($form->isSubmitted()) {
+            $token = $userModel->checkUserCredentials($form->getData());
+            if (!$token) {
+                $responseMessage = 'The username or password you entered is incorrect';
+                return $this->json($responseMessage, Response::HTTP_CREATED, [], [
+                    ObjectNormalizer::IGNORED_ATTRIBUTES => []
+                ]);
+            }
+
+            $responseMessage = sprintf("Your X-AUTH-TOKEN is: %s", $token);
+
+            return $this->json($responseMessage, Response::HTTP_CREATED, [], [
+                ObjectNormalizer::IGNORED_ATTRIBUTES => []
+            ]);
+        }
+    }
+
 
     private function getErrorsFromForm(FormInterface $form)
     {

@@ -5,7 +5,9 @@ namespace App\Model;
 
 
 use App\Entity\Asset;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class AssetModel
 {
@@ -24,10 +26,10 @@ class AssetModel
         return $asset;
     }
 
-    public function updateAsset(Asset $assetFromForm, int $id): ?Asset
+    public function updateAsset(Asset $assetFromForm, int $id, UserInterface $user): ?Asset
     {
         /** @var Asset $assetFromDb */
-        $assetFromDb = $this->entityManager->getRepository(Asset::class)->find($id);
+        $assetFromDb = $this->entityManager->getRepository(Asset::class)->findOneBy(['id' => $id, 'owner' => $user]);
         if(!$assetFromDb)
         {
             return null;
@@ -46,32 +48,44 @@ class AssetModel
         $this->entityManager->flush();
     }
 
-    public function addNewAsset(Asset $asset): Asset
+    public function addNewAsset(Asset $asset, UserInterface $user): Asset
     {
+        /** @var User $user */
+        $asset->setOwner($user);
         return $this->saveData($asset);
     }
 
-    public function getAllAssets(): array
+    public function getAllAssets(UserInterface $user): ?array
     {
-        return $this->entityManager->getRepository(Asset::class)->findAll();
+        /** @var User $user */
+        $assets = $this->entityManager->getRepository(Asset::class)->findBy(['owner' => $user]);
+        if(!$assets) {
+            return null;
+        }
+
+        return $assets;
     }
 
-    public function getOneAsset(int $id): Asset
+    public function getOneAsset(string $id, UserInterface $user): ?Asset
     {
         /** @var Asset $asset */
-        $asset = $this->entityManager->getRepository(Asset::class)->find($id);
+        $asset = $this->entityManager->getRepository(Asset::class)->findOneBy(['id' => $id, 'owner' => $user]);
+        if(!$asset) {
+            return null;
+        }
 
         return $asset;
     }
 
-    public function deleteAsset(int $id): bool
+    public function deleteAsset(string $id, UserInterface $user): bool
     {
-        $asset = $this->entityManager->getRepository(Asset::class)->find($id);
+        $asset = $this->entityManager->getRepository(Asset::class)->findOneBy(['id' => $id, 'owner' => $user]);
 
         if (!$asset) {
             return false;
         }
-
+        /** @var Asset $asset */
+        $this->deleteData($asset);
         return true;
     }
 }

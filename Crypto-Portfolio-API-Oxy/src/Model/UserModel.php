@@ -50,4 +50,18 @@ class UserModel
         }
             return $token;
     }
+
+    public function checkUserCredentials(User $user): ?string
+    {
+        $userFromDb = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $user->getEmail()]);
+
+        /** @var User $userFromDb */
+        if(!$userFromDb) {
+            return null;
+        }
+        $passwordIsValid = $this->passwordHasher->isPasswordValid($userFromDb, $user->getPassword());
+        if($passwordIsValid === true) {
+            return $userFromDb->getApiToken();
+        }
+    }
 }

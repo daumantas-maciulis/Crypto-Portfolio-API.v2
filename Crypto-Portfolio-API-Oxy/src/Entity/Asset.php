@@ -37,10 +37,10 @@ class Asset
      */
     private $value;
 
-//    /**
-//     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="assets")
-//     */
-//    private $owner;
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="assets")
+     */
+    private $owner;
 
     public function getId(): ?int
     {
@@ -83,15 +83,15 @@ class Asset
         return $this;
     }
 
-//    public function getOwner(): ?User
-//    {
-//        return $this->owner;
-//    }
-//
-//    public function setOwner(?User $owner): self
-//    {
-//        $this->owner = $owner;
-//
-//        return $this;
-//    }
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): self
+    {
+        $this->owner = $owner;
+
+        return $this;
+    }
 }

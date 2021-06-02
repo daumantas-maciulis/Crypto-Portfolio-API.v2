@@ -32,33 +32,34 @@ class AssetController extends AbstractController
 
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
         $form = $this->createForm(AssetType::class, $deserializedDataFromRequest);
-        dump($this->getUser());
         $form->submit(json_decode($request->getContent(), true));
         if (!$form->isValid()) {
-            $errors = $this->getErrorsFromForm($form);
-            $errorResponse = [
-                'error' => $errors
-            ];
-            return $this->json($errorResponse, Response::HTTP_BAD_REQUEST);
+            $errorResponse = $this->getErrorsFromForm($form);
+
+            return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
         }
 
         if ($form->isSubmitted()) {
-            $createdAsset = $assetModel->addNewAsset($form->getData());
+            $createdAsset = $assetModel->addNewAsset($form->getData(), $this->getUser());
 
-            return $this->json($createdAsset, Response::HTTP_CREATED, [], [
-                ObjectNormalizer::IGNORED_ATTRIBUTES => []
-            ]);
+            return $this->responseJson($createdAsset, Response::HTTP_CREATED);
         }
     }
 
     /**
      * @Route("", methods="GET")
      */
-    public function getAllAssetsAction(AssetModel $assetModel): JsonResponse
+    public function getAllAssetsAction(AssetModel $assetModel, Request $request): JsonResponse
     {
-        $assets = $assetModel->getAllAssets();
+        $assets = $assetModel->getAllAssets($this->getUser());
+        if ($assets === null) {
+            $response = [
+                'error' => 'You have no assets'
+            ];
+            return $this->responseJson($response, Response::HTTP_OK);
+        }
 
-        return $this->json($assets, Response::HTTP_OK);
+        return $this->responseJson($assets, Response::HTTP_OK);
     }
 
     /**
@@ -66,10 +67,15 @@ class AssetController extends AbstractController
      */
     public function getOneAssetAction($id, AssetModel $assetModel): JsonResponse
     {
-        $asset = $assetModel->getOneAsset($id);
-        return $this->json($asset, Response::HTTP_OK, [], [
-            ObjectNormalizer::IGNORED_ATTRIBUTES => []
-        ]);
+        $asset = $assetModel->getOneAsset($id, $this->getUser());
+        if ($asset === null) {
+            $message = sprintf('Asset No. %s is non existent or belongs not to you', $id);
+            $response = [
+                'error' => $message
+            ];
+            return $this->responseJson($response, Response::HTTP_OK);
+        }
+        return $this->responseJson($asset, Response::HTTP_OK);
     }
 
     /**
@@ -77,17 +83,22 @@ class AssetController extends AbstractController
      */
     public function deleteAssetAction($id, AssetModel $assetModel): JsonResponse
     {
-        $assetDeleted = $assetModel->deleteAsset($id);
+        $assetDeleted = $assetModel->deleteAsset($id, $this->getUser());
 
-        if(!$assetDeleted)
-        {
-            $response = sprintf("Asset with No. %s is non existent or it does not belong to you", $id);
-            return $this->json($response, Response::HTTP_BAD_REQUEST);
+        if (!$assetDeleted) {
+            $message = sprintf("Asset with No. %s is non existent or it does not belong to you", $id);
+            $response = [
+                'error' => $message
+            ];
+            return $this->responseJson($response, Response::HTTP_BAD_REQUEST);
         }
 
-        $response = sprintf('Asset No. %s was successfully deleted', $id);
+        $message = sprintf('Asset No. %s was successfully deleted', $id);
+        $response = [
+            'success' => $message
+        ];
 
-        return $this->json($response, Response::HTTP_OK);
+        return $this->responseJson($response, Response::HTTP_OK);
 
     }
 
@@ -103,29 +114,34 @@ class AssetController extends AbstractController
 
         $form->submit(json_decode($request->getContent(), true));
         if (!$form->isValid()) {
-            $errors = $this->getErrorsFromForm($form);
-            $errorResponse = [
-                'error' => $errors
-            ];
-            return $this->json($errorResponse, Response::HTTP_BAD_REQUEST);
+            $errorResponse = $this->getErrorsFromForm($form);
+
+            return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
         }
 
         if ($form->isSubmitted()) {
-            $patchedAsset = $assetModel->updateAsset($form->getData(), $id);
+            $patchedAsset = $assetModel->updateAsset($form->getData(), $id, $this->getUser());
+            if (!$patchedAsset) {
+                $message = sprintf("Asset with No. %s is non existent or it does not belong to you", $id);
+                $response = [
+                    'error' => $message
+                ];
+                return $this->responseJson($response, Response::HTTP_BAD_REQUEST);
+            }
 
-            return $this->json($patchedAsset, Response::HTTP_CREATED, [], [
-                ObjectNormalizer::IGNORED_ATTRIBUTES => []
-            ]);
+            return $this->responseJson($patchedAsset, Response::HTTP_CREATED);
         }
     }
 
 
     private function getErrorsFromForm(FormInterface $form)
     {
-        $errors = array();
+        $errors = [];
+
         foreach ($form->getErrors() as $error) {
             $errors[] = $error->getMessage();
         }
+
         foreach ($form->all() as $childForm) {
             if ($childForm instanceof FormInterface) {
                 if ($childErrors = $this->getErrorsFromForm($childForm)) {
@@ -133,7 +149,18 @@ class AssetController extends AbstractController
                 }
             }
         }
-        return $errors;
+        $errorResponse = [
+            'error' => $errors
+        ];
+        return $errorResponse;
     }
+
+    private function responseJson(Asset|array $responseMessage, int $responseCode): JsonResponse
+    {
+        return $this->json($responseMessage, $responseCode, [], [
+            ObjectNormalizer::IGNORED_ATTRIBUTES => ['owner']
+        ]);
+    }
+
 }
 
