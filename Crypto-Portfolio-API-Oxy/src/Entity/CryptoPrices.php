@@ -10,9 +10,6 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class CryptoPrices
 {
-
-
-
     /**
      * @ORM\Id
      * @ORM\GeneratedValue

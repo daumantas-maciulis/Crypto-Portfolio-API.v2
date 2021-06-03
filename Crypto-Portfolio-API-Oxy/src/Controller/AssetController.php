@@ -3,11 +3,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Client\CoinLayer\Client;
 use App\Model\AssetModel;
 use App\Entity\Asset;
 use App\Form\AssetType;
-use App\Model\CryptoPricesModel;
+use App\Service\UpdateCryptoPricesInUsdService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,7 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 use Symfony\Component\Serializer\Serializer;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/api/v1/asset")
@@ -27,7 +25,7 @@ class AssetController extends AbstractController
     /**
      * @Route("", methods="POST")
      */
-    public function addNewAssetAction(Request $request, AssetModel $assetModel, ValidatorInterface $validator, CryptoPricesModel $cryptoPricesModel, Client $client): JsonResponse
+    public function addNewAssetAction(Request $request, AssetModel $assetModel, UpdateCryptoPricesInUsdService $service): JsonResponse
     {
         $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
@@ -42,7 +40,7 @@ class AssetController extends AbstractController
 
         if ($form->isSubmitted()) {
             $createdAsset = $assetModel->addNewAsset($form->getData(), $this->getUser());
-
+            $service->updateCryptoPricesInUsd($this->getUser());
             return $this->responseJson($createdAsset, Response::HTTP_CREATED);
         }
     }
@@ -50,7 +48,7 @@ class AssetController extends AbstractController
     /**
      * @Route("", methods="GET")
      */
-    public function getAllAssetsAction(AssetModel $assetModel, Request $request): JsonResponse
+    public function getAllAssetsAction(AssetModel $assetModel, Request $request, UpdateCryptoPricesInUsdService $service): JsonResponse
     {
         $assets = $assetModel->getAllAssets($this->getUser());
         if ($assets === null) {
@@ -59,14 +57,14 @@ class AssetController extends AbstractController
             ];
             return $this->responseJson($response, Response::HTTP_OK);
         }
-
+        $service->updateCryptoPricesInUsd($this->getUser());
         return $this->responseJson($assets, Response::HTTP_OK);
     }
 
     /**
      * @Route("/{id}", methods="GET")
      */
-    public function getOneAssetAction($id, AssetModel $assetModel): JsonResponse
+    public function getOneAssetAction($id, AssetModel $assetModel, UpdateCryptoPricesInUsdService $service): JsonResponse
     {
         $asset = $assetModel->getOneAsset($id, $this->getUser());
         if ($asset === null) {
@@ -76,6 +74,7 @@ class AssetController extends AbstractController
             ];
             return $this->responseJson($response, Response::HTTP_OK);
         }
+        $service->updateCryptoPricesInUsd($this->getUser());
         return $this->responseJson($asset, Response::HTTP_OK);
     }
 
@@ -106,7 +105,7 @@ class AssetController extends AbstractController
     /**
      * @Route("/{id}", methods="PATCH")
      */
-    public function patchAssetAction($id, AssetModel $assetModel, Request $request): JsonResponse
+    public function patchAssetAction($id, AssetModel $assetModel, Request $request, UpdateCryptoPricesInUsdService $service): JsonResponse
     {
         $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
 
@@ -129,7 +128,7 @@ class AssetController extends AbstractController
                 ];
                 return $this->responseJson($response, Response::HTTP_BAD_REQUEST);
             }
-
+            $service->updateCryptoPricesInUsd($this->getUser());
             return $this->responseJson($patchedAsset, Response::HTTP_CREATED);
         }
     }

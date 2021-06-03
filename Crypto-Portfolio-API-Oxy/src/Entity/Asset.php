@@ -42,6 +42,11 @@ class Asset
      */
     private $owner;
 
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $priceInUsd;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -91,6 +96,18 @@ class Asset
     public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function getPriceInUsd(): ?float
+    {
+        return $this->priceInUsd;
+    }
+
+    public function setPriceInUsd(?float $priceInUsd): self
+    {
+        $this->priceInUsd = $priceInUsd;
 
         return $this;
     }

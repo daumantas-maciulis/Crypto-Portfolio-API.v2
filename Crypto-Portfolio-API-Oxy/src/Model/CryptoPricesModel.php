@@ -32,7 +32,7 @@ class CryptoPricesModel
         $this->entityManager->flush();
     }
 
-    public function saveOrUpdateCryptoPrices(array $cryptoPricesArray)
+    public function saveCryptoPrices(array $cryptoPricesArray)
     {
         foreach(self::CRYPT_CURRENCIES as $cryptoCurrency) {
             if($cryptoCurrency === 'IOTA')
@@ -49,5 +49,12 @@ class CryptoPricesModel
 
             $this->saveData($cryptoPrice);
         }
+    }
+
+    public function getCryptoPriceByCurrency(string $currency): float
+    {
+        $cryptoCurrency = $this->entityManager->getRepository(CryptoPrices::class)->findOneBy(['name' => $currency]);
+        /** @var CryptoPrices $cryptoCurrency */
+        return $cryptoCurrency->getValue();
     }
 }

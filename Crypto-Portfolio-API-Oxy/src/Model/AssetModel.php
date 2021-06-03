@@ -42,6 +42,12 @@ class AssetModel
         return $this->saveData($assetFromDb);
     }
 
+    public function updateAssetPriceInUsd(Asset $asset, float $priceInUsd): void
+    {
+        $asset->setPriceInUsd($priceInUsd);
+        $this->saveData($asset);
+    }
+
     private function deleteData(Asset $asset): void
     {
         $this->entityManager->remove($asset);
@@ -88,4 +94,6 @@ class AssetModel
         $this->deleteData($asset);
         return true;
     }
+
+
 }
