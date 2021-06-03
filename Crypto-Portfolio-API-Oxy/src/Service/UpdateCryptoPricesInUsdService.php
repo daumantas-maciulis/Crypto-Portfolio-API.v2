@@ -37,7 +37,7 @@ class UpdateCryptoPricesInUsdService
 
            $calculatedCryptoPriceInUsd = $currencyValue * $currencyValueInUsd;
 
-           $this->assetModel->updateAssetPriceInUsd($asset, $calculatedCryptoPriceInUsd);
+           $this->assetModel->updateAssetPriceInUsd($asset, round($calculatedCryptoPriceInUsd, 2));
         }
     }
 }

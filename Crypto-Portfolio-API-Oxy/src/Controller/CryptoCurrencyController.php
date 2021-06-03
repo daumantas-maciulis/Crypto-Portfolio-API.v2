@@ -5,15 +5,23 @@ namespace App\Controller;
 
 
 use App\Client\CoinLayer\Client as CryptoPricesClient;
+use App\Model\CryptoPricesModel;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class CryptoCurrencyController extends AbstractController
 {
-    public function saveCryptoPricesAction(CryptoPricesClient $cryptoPricesClient, CryptoModel $cryptoModel)
+    private CryptoPricesClient $cryptoPricesClient;
+    private CryptoPricesModel $cryptoModel;
+
+    public function __construct(CryptoPricesClient $cryptoPricesClient, CryptoPricesModel $cryptoModel)
     {
-        //request prices
-        $cryptoPricesArray = $cryptoPricesClient->getCryptoPricesInUsd();
-        //save them into database
-        $cryptoModel->saveCryptoPrices($cryptoPricesArray);
+        $this->cryptoPricesClient = $cryptoPricesClient;
+        $this->cryptoModel = $cryptoModel;
+    }
+
+    public function saveCryptoPricesAction(): void
+    {
+        $cryptoPricesArray = $this->cryptoPricesClient->getCryptoPricesInUsd();
+        $this->cryptoModel->saveCryptoPrices($cryptoPricesArray);
     }
 }
