@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Model\AssetModel;
 use App\Entity\Asset;
 use App\Form\AssetType;
+use App\Serializer\Serializer;
 use App\Service\UpdateCryptoPricesInUsdService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -13,9 +14,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
-use Symfony\Component\Serializer\Serializer;
 
 /**
  * @Route("/api/v1/asset")
@@ -25,30 +24,26 @@ class AssetController extends AbstractController
     /**
      * @Route("", methods="POST")
      */
-    public function addNewAssetAction(Request $request, AssetModel $assetModel, UpdateCryptoPricesInUsdService $service): JsonResponse
+    public function addNewAssetAction(Request $request, AssetModel $assetModel, UpdateCryptoPricesInUsdService $service, Serializer $serializer): JsonResponse
     {
-        $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
-
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
         $form = $this->createForm(AssetType::class, $deserializedDataFromRequest);
         $form->submit(json_decode($request->getContent(), true));
-        if (!$form->isValid()) {
-            $errorResponse = $this->getErrorsFromForm($form);
 
-            return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
-        }
-
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $createdAsset = $assetModel->addNewAsset($form->getData(), $this->getUser());
             $service->updateCryptoPricesInUsd($this->getUser());
             return $this->responseJson($createdAsset, Response::HTTP_CREATED);
         }
+        $errorResponse = $this->getErrorsFromForm($form);
+
+        return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
     }
 
     /**
      * @Route("", methods="GET")
      */
-    public function getAllAssetsAction(AssetModel $assetModel, Request $request, UpdateCryptoPricesInUsdService $service): JsonResponse
+    public function getAllAssetsAction(AssetModel $assetModel, UpdateCryptoPricesInUsdService $service): JsonResponse
     {
         $assets = $assetModel->getAllAssets($this->getUser());
         if ($assets === null) {
@@ -99,27 +94,19 @@ class AssetController extends AbstractController
         ];
 
         return $this->responseJson($response, Response::HTTP_OK);
-
     }
 
     /**
      * @Route("/{id}", methods="PATCH")
      */
-    public function patchAssetAction($id, AssetModel $assetModel, Request $request, UpdateCryptoPricesInUsdService $service): JsonResponse
+    public function patchAssetAction($id, AssetModel $assetModel, Request $request, UpdateCryptoPricesInUsdService $service, Serializer $serializer): JsonResponse
     {
-        $serializer = new Serializer([new ObjectNormalizer()], [new JsonEncoder()]);
-
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
         $form = $this->createForm(AssetType::class, $deserializedDataFromRequest);
 
         $form->submit(json_decode($request->getContent(), true));
-        if (!$form->isValid()) {
-            $errorResponse = $this->getErrorsFromForm($form);
 
-            return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
-        }
-
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
             $patchedAsset = $assetModel->updateAsset($form->getData(), $id, $this->getUser());
             if (!$patchedAsset) {
                 $message = sprintf("Asset with No. %s is non existent or it does not belong to you", $id);
@@ -131,6 +118,9 @@ class AssetController extends AbstractController
             $service->updateCryptoPricesInUsd($this->getUser());
             return $this->responseJson($patchedAsset, Response::HTTP_CREATED);
         }
+        $errorResponse = $this->getErrorsFromForm($form);
+
+        return $this->responseJson($errorResponse, Response::HTTP_BAD_REQUEST);
     }
 
 
@@ -161,6 +151,5 @@ class AssetController extends AbstractController
             ObjectNormalizer::IGNORED_ATTRIBUTES => ['owner']
         ]);
     }
-
 }
 

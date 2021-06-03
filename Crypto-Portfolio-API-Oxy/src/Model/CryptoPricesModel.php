@@ -1,8 +1,7 @@
 <?php
-
+declare(strict_types=1);
 
 namespace App\Model;
-
 
 use App\Entity\CryptoPrices;
 use Doctrine\ORM\EntityManagerInterface;
@@ -26,13 +25,13 @@ class CryptoPricesModel
         $this->entityManager = $entityManager;
     }
 
-    private function saveData(CryptoPrices $cryptoPrices)
+    private function saveData(CryptoPrices $cryptoPrices): void
     {
         $this->entityManager->persist($cryptoPrices);
         $this->entityManager->flush();
     }
 
-    public function saveCryptoPrices(array $cryptoPricesArray)
+    public function saveCryptoPrices(array $cryptoPricesArray): void
     {
         foreach(self::CRYPT_CURRENCIES as $cryptoCurrency) {
             if($cryptoCurrency === 'IOTA')

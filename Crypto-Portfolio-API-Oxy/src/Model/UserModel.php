@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
@@ -25,7 +24,7 @@ class UserModel
         $this->entityManager->flush();
     }
 
-    public function addNewUser(User $user)
+    public function addNewUser(User $user): string
     {
         $plainPassword = $user->getPassword();
         $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);

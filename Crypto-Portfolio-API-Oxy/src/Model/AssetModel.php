@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Model;
 
-
 use App\Entity\Asset;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
@@ -30,8 +29,7 @@ class AssetModel
     {
         /** @var Asset $assetFromDb */
         $assetFromDb = $this->entityManager->getRepository(Asset::class)->findOneBy(['id' => $id, 'owner' => $user]);
-        if(!$assetFromDb)
-        {
+        if (!$assetFromDb) {
             return null;
         }
 
@@ -65,7 +63,7 @@ class AssetModel
     {
         /** @var User $user */
         $assets = $this->entityManager->getRepository(Asset::class)->findBy(['owner' => $user]);
-        if(!$assets) {
+        if (!$assets) {
             return null;
         }
 
@@ -76,7 +74,7 @@ class AssetModel
     {
         /** @var Asset $asset */
         $asset = $this->entityManager->getRepository(Asset::class)->findOneBy(['id' => $id, 'owner' => $user]);
-        if(!$asset) {
+        if (!$asset) {
             return null;
         }
 
@@ -94,6 +92,5 @@ class AssetModel
         $this->deleteData($asset);
         return true;
     }
-
-
 }
+

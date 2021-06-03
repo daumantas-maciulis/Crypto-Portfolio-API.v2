@@ -41,7 +41,6 @@ class ApiKeyAuthenticator extends AbstractAuthenticator
         $data = [
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
         ];
-
         return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
     }
 }

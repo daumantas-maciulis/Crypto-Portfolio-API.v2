@@ -1,8 +1,7 @@
 <?php
-
+declare(strict_types=1);
 
 namespace App\Client\CoinLayer;
-
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +13,6 @@ class Client extends AbstractController
     private const TARGET_CURRENCY = "target=USD";
 
     private const CRYPTO_CURRENCIES = "symbols=BTC,ETH,MIOTA";
-
 
     public function getCryptoPricesInUsd()
     {
@@ -30,8 +28,7 @@ class Client extends AbstractController
 
         $apiResponseArray = json_decode($apiResponse->getBody()->getContents(), true);
 
-
         return $apiResponseArray['rates'];
     }
-
 }
+

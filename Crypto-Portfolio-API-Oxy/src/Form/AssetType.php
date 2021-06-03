@@ -16,12 +16,10 @@ class AssetType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('label', TextType::class, [
-                'constraints' => new NotBlank(),
-
-            ])
+            ->add('label', TextType::class)
             ->add('currency', TextType::class)
-            ->add('value', NumberType::class);
+            ->add('value', NumberType::class)
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver)
