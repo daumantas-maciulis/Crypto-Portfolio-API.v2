@@ -26,6 +26,7 @@ class AssetController extends AbstractController
      */
     public function addNewAssetAction(Request $request, AssetModel $assetModel, UpdateCryptoPricesInUsdService $service, Serializer $serializer): JsonResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
         $deserializedDataFromRequest = $serializer->deserialize($request->getContent(), Asset::class, 'json');
         $form = $this->createForm(AssetType::class, $deserializedDataFromRequest);
         $form->submit(json_decode($request->getContent(), true));

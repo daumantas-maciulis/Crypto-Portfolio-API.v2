@@ -13,6 +13,7 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             custom_authenticators:
                 - App\Security\ApiKeyAuthenticator
@@ -24,5 +25,5 @@ security:
 
     access_control:
             - { path: ^/api/create-account, roles: PUBLIC_ACCESS }
-            - { path: ^/api, roles: ROLE_ADMIN }
+            - { path: ^/api, roles: [IS_AUTHENTICATED_FULLY, ROLE_ADMIN] }
         # - { path: ^/profile, roles: ROLE_USER }
